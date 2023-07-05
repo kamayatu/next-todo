@@ -2,7 +2,6 @@ import axios from "axios";
 import Link from "next/link";
 import { baseURL } from "../constants/constants";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 
 export async function getServerSideProps() {
   const res = await axios.get(baseURL);
@@ -19,7 +18,6 @@ type Post = {
 
 export default function Home({ posts }) {
   const [todos, setTodos] = useState<Post[]>([]);
-  const router = useRouter();
 
   useEffect(() => {
     setTodos(posts);
@@ -32,14 +30,11 @@ export default function Home({ posts }) {
         .delete(`${baseURL}/${index}`, {
           data: { userId: index },
         })
-        .then((res) => {});
+        .then((res) => {
+          setTodos(res.data);
+        });
     }
-    const getAllPosts = async () => {
-      const res = await axios.get(baseURL);
-      setTodos(res.data);
-    };
     deletePost();
-    getAllPosts();
   };
 
   //ステータス変更時
@@ -49,14 +44,11 @@ export default function Home({ posts }) {
         .put(`${baseURL}/${targetPost.id}`, {
           status: e.target.value,
         })
-        .then((res) => {});
-    };
-    const getAllPosts = async () => {
-      const res = await axios.get(baseURL);
-      setTodos(res.data);
+        .then((res) => {
+          setTodos(res.data);
+        });
     };
     changeStatus();
-    getAllPosts();
   };
 
   return (
@@ -72,7 +64,7 @@ export default function Home({ posts }) {
           </div>
           <ul>
             {todos.map((post) => (
-              <li className="flex justify-center my-2">
+              <li className="flex justify-center my-2" key={post.id}>
                 <p className="bg-blue-200 leading-10 py-1 px-4 mr-5 w-64">{post.title}</p>
                 <div className="flex">
                   <Link href={`/edit/${post.id}`}>
